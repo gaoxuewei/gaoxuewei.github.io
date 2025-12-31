@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日图片</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.5);
+            transition: background-color 0.3s;
+            width: 80px;
+            height: 40px;
+            text-align: center;
+            box-sizing: border-box;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 20px; /* 确保文字垂直居中 */
+        }
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button onclick="document.getElementById('fileInput').click()">自定</button>
+        <input type="file" id="fileInput" accept="image/*" onchange="changeBackgroundFromLocal()">
+        <button onclick="changeBackgroundToBing()">Bing</button>
+    </div>
+
+    <script>
+        // 默认显示Bing每日图片
+        window.onload = function() {
+            changeBackgroundToBing();
+        };
+
+        // 从本地选择图片
+        function changeBackgroundFromLocal() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url('${e.target.result}')`;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // 显示Bing每日图片
+        function changeBackgroundToBing() {
+            const bingUrls = [
+                'https://bing.img.run/rand.php',
+                'http://apis.uctb.cn/api/bing',
+                'https://wei.thax.cn/res/api/bing/?res=1080p&mode=301'
+            ];
+            let currentIndex = 0;
+
+            function tryNextUrl() {
+                if (currentIndex >= bingUrls.length) {
+                    console.error('所有Bing每日图片地址均失败，使用备用图片');
+                    document.body.style.backgroundImage = `url('https://picsum.photos/1920/1080')`;
+                    return;
+                }
+
+                const imageUrl = bingUrls[currentIndex];
+                // 直接设置图片URL，不需要fetch JSON
+                const img = new Image();
+                img.onload = function() {
+                    document.body.style.backgroundImage = `url('${imageUrl}')`;
+                };
+                img.onerror = function() {
+                    console.error(`获取Bing每日图片失败: ${imageUrl}`);
+                    currentIndex++;
+                    tryNextUrl();
+                };
+                img.src = imageUrl;
+            }
+
+            tryNextUrl();
+        }
+    </script>
+</body>
+</html>
